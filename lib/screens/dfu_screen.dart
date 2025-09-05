@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../providers/dfu_provider.dart';
+import 'dfu_history_screen.dart';
 
 class DfuScreen extends StatefulWidget {
   const DfuScreen({super.key});
@@ -35,6 +36,52 @@ class _DfuScreenState extends State<DfuScreen> {
       appBar: AppBar(
         title: const Text('Nordic Auto DFU'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          Consumer<DfuProvider>(
+            builder: (context, dfuProvider, child) {
+              return IconButton(
+                icon: Stack(
+                  children: [
+                    const Icon(Icons.history),
+                    if (dfuProvider.dfuHistory.isNotEmpty)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 12,
+                            minHeight: 12,
+                          ),
+                          child: Text(
+                            '${dfuProvider.dfuHistory.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DfuHistoryScreen(),
+                    ),
+                  );
+                },
+                tooltip: 'DFU 히스토리',
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<DfuProvider>(
         builder: (context, dfuProvider, child) {
