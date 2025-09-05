@@ -48,7 +48,9 @@ class DfuHistoryScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<DfuProvider>(
+      body: SafeArea(
+        bottom: true, // 소프트버튼 영역 제외
+        child: Consumer<DfuProvider>(
         builder: (context, dfuProvider, child) {
           if (dfuProvider.dfuHistory.isEmpty) {
             return const Center(
@@ -230,6 +232,7 @@ class DfuHistoryScreen extends StatelessWidget {
             },
           );
         },
+        ),
       ),
     );
   }

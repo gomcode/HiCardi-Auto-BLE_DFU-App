@@ -135,32 +135,56 @@ class DfuProvider extends ChangeNotifier {
     await prefs.setString('dfu_history', historyJson);
   }
 
+  Timer? _scanUpdateTimer;
+  List<ScanResult> _latestScanResults = [];
+  
   Future<void> startScan() async {
     _isScanning = true;
     _devices.clear();
+    _latestScanResults.clear();
     notifyListeners();
 
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
       
+      // 스캔 결과를 실시간으로 저장
       FlutterBluePlus.scanResults.listen((results) {
-        _devices.clear();
-        for (ScanResult result in results) {
-          // HiCardi- 접두사가 있는 기기만 필터링
-          if (result.device.platformName.isNotEmpty && 
-              result.device.platformName.startsWith('HiCardi-')) {
-            _devices.add(result.device);
-          }
-        }
-        notifyListeners();
+        _latestScanResults = results;
       });
+      
+      // UI 업데이트를 주기적으로 수행 (500ms마다)
+      _scanUpdateTimer?.cancel();
+      _scanUpdateTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+        _updateScanResults();
+      });
+      
     } catch (e) {
       debugPrint('스캔 오류: $e');
     }
 
     await Future.delayed(const Duration(seconds: 10));
+    _scanUpdateTimer?.cancel();
     _isScanning = false;
+    _updateScanResults(); // 마지막 업데이트
     notifyListeners();
+  }
+  
+  void _updateScanResults() {
+    final previousDeviceCount = _devices.length;
+    _devices.clear();
+    
+    for (ScanResult result in _latestScanResults) {
+      // HiCardi- 접두사가 있는 기기만 필터링
+      if (result.device.platformName.isNotEmpty && 
+          result.device.platformName.startsWith('HiCardi-')) {
+        _devices.add(result.device);
+      }
+    }
+    
+    // 기기 수가 변경되었을 때만 UI 업데이트
+    if (_devices.length != previousDeviceCount) {
+      notifyListeners();
+    }
   }
 
   List<BluetoothDevice> _getFilteredDevices() {
@@ -178,7 +202,7 @@ class DfuProvider extends ChangeNotifier {
         // 정확히 'HiCardi-' 다음에 숫자가 오는 경우만 (알파벳이 없는 경우)
         modelMatch = RegExp(r'^HiCardi-[0-9]').hasMatch(deviceName);
       } else {
-        // 특정 모델 (A, C, D, E, M)
+        // 특정 모델 (A, C, D, E, M, N)
         modelMatch = deviceName.startsWith(_modelFilter);
       }
       
