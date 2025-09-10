@@ -415,6 +415,21 @@ class _DfuScreenState extends State<DfuScreen> {
                       ),
                     ),
                   ],
+                  // 앱 버전 정보 표시
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: const [
+                      Text(
+                        'V1.0.0',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
