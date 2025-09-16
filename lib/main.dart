@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'screens/dfu_screen.dart';
-import 'providers/dfu_provider.dart';
+import 'presentation/providers/ble_provider.dart';
+import 'presentation/providers/dfu_provider.dart';
+import 'core/constants/app_constants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,10 +14,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => DfuProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => BleProvider()),
+        ChangeNotifierProvider(create: (context) => DfuProvider()),
+        ChangeNotifierProvider(create: (context) => HistoryProvider()),
+      ],
       child: MaterialApp(
-        title: 'Nordic Auto DFU',
+        title: AppConstants.appTitle,
         theme: ThemeData(
           primarySwatch: Colors.blue,
           useMaterial3: true,

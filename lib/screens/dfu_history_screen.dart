@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/dfu_provider.dart';
+import '../presentation/providers/dfu_provider.dart';
+import '../core/utils/date_formatter.dart';
 
 class DfuHistoryScreen extends StatelessWidget {
   const DfuHistoryScreen({super.key});
@@ -12,11 +13,11 @@ class DfuHistoryScreen extends StatelessWidget {
         title: const Text('DFU 업데이트 히스토리'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          Consumer<DfuProvider>(
-            builder: (context, dfuProvider, child) {
+          Consumer<HistoryProvider>(
+            builder: (context, historyProvider, child) {
               return IconButton(
                 icon: const Icon(Icons.delete_sweep),
-                onPressed: dfuProvider.dfuHistory.isEmpty
+                onPressed: historyProvider.dfuHistory.isEmpty
                     ? null
                     : () {
                         showDialog(
@@ -32,7 +33,7 @@ class DfuHistoryScreen extends StatelessWidget {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    dfuProvider.clearHistory();
+                                    historyProvider.clearHistory();
                                     Navigator.of(context).pop();
                                   },
                                   child: const Text('삭제'),
@@ -50,9 +51,9 @@ class DfuHistoryScreen extends StatelessWidget {
       ),
       body: SafeArea(
         bottom: true, // 소프트버튼 영역 제외
-        child: Consumer<DfuProvider>(
-        builder: (context, dfuProvider, child) {
-          if (dfuProvider.dfuHistory.isEmpty) {
+        child: Consumer<HistoryProvider>(
+        builder: (context, historyProvider, child) {
+          if (historyProvider.dfuHistory.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -85,9 +86,9 @@ class DfuHistoryScreen extends StatelessWidget {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: dfuProvider.dfuHistory.length,
+            itemCount: historyProvider.dfuHistory.length,
             itemBuilder: (context, index) {
-              final historyItem = dfuProvider.dfuHistory[index];
+              final historyItem = historyProvider.dfuHistory[index];
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: Padding(
@@ -153,22 +154,25 @@ class DfuHistoryScreen extends StatelessWidget {
                               if (!historyItem.isSuccess) ...[
                                 const SizedBox(height: 8),
                                 ElevatedButton.icon(
-                                  onPressed: dfuProvider.isDfuInProgress
-                                      ? null
-                                      : () async {
-                                          try {
-                                            await dfuProvider.retryDfu(historyItem);
-                                          } catch (e) {
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('재시도 실패: $e'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            }
-                                          }
-                                        },
+                                  onPressed: () async {
+                                    try {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('재시도는 메인 화면에서 해당 기기를 다시 선택하여 진행해주세요.'),
+                                          backgroundColor: Colors.blue,
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('재시도 실패: $e'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
                                   icon: const Icon(Icons.refresh, size: 16),
                                   label: const Text(
                                     '재시도',
@@ -198,7 +202,7 @@ class DfuHistoryScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            _formatDateTime(historyItem.timestamp),
+                            DateFormatter.formatDateTime(historyItem.timestamp),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -237,8 +241,4 @@ class DfuHistoryScreen extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }
