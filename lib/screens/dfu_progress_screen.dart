@@ -34,6 +34,7 @@ class DfuProgressScreen extends StatelessWidget {
                       status: dfuProvider.dfuStatus,
                       deviceProgressMap: dfuProvider.deviceProgressMap,
                       isMultipleDfu: dfuProvider.isMultipleDfu,
+                      isParallelMode: dfuProvider.isParallelMode,
                     ),
                   ),
                   if (!dfuProvider.isDfuInProgress) ...[

@@ -133,12 +133,18 @@ class DfuScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FilterWidget(
-                          modelFilter: bleProvider.modelFilter,
-                          serialRangeStart: bleProvider.serialRangeStart,
-                          serialRangeEnd: bleProvider.serialRangeEnd,
-                          onModelFilterChanged: bleProvider.setModelFilter,
-                          onSerialRangeChanged: bleProvider.setSerialRange,
+                        Consumer<DfuProvider>(
+                          builder: (context, dfuProvider, child) {
+                            return FilterWidget(
+                              modelFilter: bleProvider.modelFilter,
+                              serialRangeStart: bleProvider.serialRangeStart,
+                              serialRangeEnd: bleProvider.serialRangeEnd,
+                              isParallelMode: dfuProvider.isParallelMode,
+                              onModelFilterChanged: bleProvider.setModelFilter,
+                              onSerialRangeChanged: bleProvider.setSerialRange,
+                              onParallelModeChanged: dfuProvider.setParallelMode,
+                            );
+                          },
                         ),
                         const SizedBox(height: 12),
                         DeviceListWidget(
@@ -240,8 +246,15 @@ class DfuScreen extends StatelessWidget {
       context,
       MaterialPageRoute(builder: (context) => const DfuProgressScreen()),
     );
-    dfuProvider.startDfu(bleProvider.selectedDevices);
 
-    bleProvider.selectedDevices.forEach(bleProvider.removeFromSelection);
+    // 선택된 기기 리스트의 복사본 생성
+    final selectedDevices = bleProvider.selectedDevices.toList();
+
+    dfuProvider.startDfu(selectedDevices);
+
+    // 복사본을 사용하여 안전하게 선택 해제
+    for (final device in selectedDevices) {
+      bleProvider.removeFromSelection(device);
+    }
   }
 }

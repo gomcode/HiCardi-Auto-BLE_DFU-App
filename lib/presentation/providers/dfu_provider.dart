@@ -18,6 +18,7 @@ class DfuProvider extends ChangeNotifier {
   final Map<String, DeviceDfuProgress> _deviceProgressMap = {};
   int _currentDfuIndex = 0;
   int _totalDfuDevices = 0;
+  bool _isParallelMode = true; // 기본적으로 병렬 모드 활성화
 
   File? get selectedFirmwareFile => _selectedFirmwareFile;
   bool get isDfuInProgress => _isDfuInProgress;
@@ -27,6 +28,7 @@ class DfuProvider extends ChangeNotifier {
   int get currentDfuIndex => _currentDfuIndex;
   int get totalDfuDevices => _totalDfuDevices;
   bool get isMultipleDfu => _totalDfuDevices > 1;
+  bool get isParallelMode => _isParallelMode;
 
   DfuProvider() {
     _loadSavedSettings();
@@ -43,6 +45,11 @@ class DfuProvider extends ChangeNotifier {
   void selectFirmwareFile(File file) {
     _selectedFirmwareFile = file;
     PreferencesRepository.saveFirmwarePath(file.path);
+    notifyListeners();
+  }
+
+  void setParallelMode(bool isEnabled) {
+    _isParallelMode = isEnabled;
     notifyListeners();
   }
 
@@ -76,34 +83,73 @@ class DfuProvider extends ChangeNotifier {
 
     notifyListeners();
 
-    await _dfuService.performMultipleDfu(
-      sortedDevices,
-      _selectedFirmwareFile!,
-      _deviceProgressMap,
-      onOverallProgress: (currentIndex, total, status) {
-        _currentDfuIndex = currentIndex;
-        _dfuStatus = status;
-        notifyListeners();
-      },
-      onDeviceProgress: (deviceProgress) {
-        if (_totalDfuDevices > 1) {
+    if (_isParallelMode && _totalDfuDevices > 1) {
+      // 병렬 처리 모드 (8대씩 동시 진행)
+      await _dfuService.performConcurrentDfu(
+        sortedDevices,
+        _selectedFirmwareFile!,
+        _deviceProgressMap,
+        maxConcurrentDevices: 8,
+        onOverallProgress: (status) {
+          _dfuStatus = status;
+          notifyListeners();
+        },
+        onDeviceProgress: (deviceProgress) {
+          // 병렬 처리에서의 전체 진행률 계산 - 더 정확한 계산
           double totalProgress = 0.0;
+          int validDevices = 0;
+
           for (final progress in _deviceProgressMap.values) {
             totalProgress += progress.progress;
+            validDevices++;
           }
-          _dfuProgress = totalProgress / _totalDfuDevices;
-        } else {
-          _dfuProgress = deviceProgress.progress;
-        }
-        notifyListeners();
-      },
-      onDeviceCompleted: (device, fileName) {
-        _addToHistory(device, fileName, true, null);
-      },
-      onDeviceError: (device, fileName, error) {
-        _addToHistory(device, fileName, false, error);
-      },
-    );
+
+          if (validDevices > 0) {
+            _dfuProgress = totalProgress / validDevices;
+          }
+
+          // 진행률이 유효한 범위 내에 있는지 확인
+          _dfuProgress = _dfuProgress.clamp(0.0, 1.0);
+          notifyListeners();
+        },
+        onDeviceCompleted: (device, fileName) {
+          _addToHistory(device, fileName, true, null);
+        },
+        onDeviceError: (device, fileName, error) {
+          _addToHistory(device, fileName, false, error);
+        },
+      );
+    } else {
+      // 기존 순차 처리 모드
+      await _dfuService.performMultipleDfu(
+        sortedDevices,
+        _selectedFirmwareFile!,
+        _deviceProgressMap,
+        onOverallProgress: (currentIndex, total, status) {
+          _currentDfuIndex = currentIndex;
+          _dfuStatus = status;
+          notifyListeners();
+        },
+        onDeviceProgress: (deviceProgress) {
+          if (_totalDfuDevices > 1) {
+            double totalProgress = 0.0;
+            for (final progress in _deviceProgressMap.values) {
+              totalProgress += progress.progress;
+            }
+            _dfuProgress = totalProgress / _totalDfuDevices;
+          } else {
+            _dfuProgress = deviceProgress.progress;
+          }
+          notifyListeners();
+        },
+        onDeviceCompleted: (device, fileName) {
+          _addToHistory(device, fileName, true, null);
+        },
+        onDeviceError: (device, fileName, error) {
+          _addToHistory(device, fileName, false, error);
+        },
+      );
+    }
 
     _isDfuInProgress = false;
     final completedCount = _deviceProgressMap.values.where((p) => p.isCompleted).length;
