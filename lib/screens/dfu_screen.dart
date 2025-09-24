@@ -117,52 +117,40 @@ class DfuScreen extends StatelessWidget {
   }
 
   Widget _buildBody() {
-    return SafeArea(
-      bottom: true,
-      child: Consumer<BleProvider>(
-        builder: (context, bleProvider, child) {
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Consumer<DfuProvider>(
-                          builder: (context, dfuProvider, child) {
-                            return FilterWidget(
-                              modelFilter: bleProvider.modelFilter,
-                              serialRangeStart: bleProvider.serialRangeStart,
-                              serialRangeEnd: bleProvider.serialRangeEnd,
-                              isParallelMode: dfuProvider.isParallelMode,
-                              onModelFilterChanged: bleProvider.setModelFilter,
-                              onSerialRangeChanged: bleProvider.setSerialRange,
-                              onParallelModeChanged: dfuProvider.setParallelMode,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        DeviceListWidget(
-                          devices: bleProvider.devices,
-                          selectedDevices: bleProvider.selectedDevices,
-                          onDeviceToggle: bleProvider.toggleDeviceSelection,
-                          onSelectAll: bleProvider.selectAllFilteredDevices,
-                          onClearSelection: bleProvider.clearDeviceSelection,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+    return Consumer<BleProvider>(
+      builder: (context, bleProvider, child) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-          );
-        },
-      ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FilterWidget(
+                    modelFilter: bleProvider.modelFilter,
+                    serialRangeStart: bleProvider.serialRangeStart,
+                    serialRangeEnd: bleProvider.serialRangeEnd,
+                    onModelFilterChanged: bleProvider.setModelFilter,
+                    onSerialRangeChanged: bleProvider.setSerialRange,
+                  ),
+                  const SizedBox(height: 12),
+                  DeviceListWidget(
+                    devices: bleProvider.devices,
+                    selectedDevices: bleProvider.selectedDevices,
+                    onDeviceToggle: bleProvider.toggleDeviceSelection,
+                    onSelectAll: bleProvider.selectAllFilteredDevices,
+                    onClearSelection: bleProvider.clearDeviceSelection,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -246,15 +234,8 @@ class DfuScreen extends StatelessWidget {
       context,
       MaterialPageRoute(builder: (context) => const DfuProgressScreen()),
     );
+    dfuProvider.startDfu(bleProvider.selectedDevices);
 
-    // 선택된 기기 리스트의 복사본 생성
-    final selectedDevices = bleProvider.selectedDevices.toList();
-
-    dfuProvider.startDfu(selectedDevices);
-
-    // 복사본을 사용하여 안전하게 선택 해제
-    for (final device in selectedDevices) {
-      bleProvider.removeFromSelection(device);
-    }
+    bleProvider.selectedDevices.forEach(bleProvider.removeFromSelection);
   }
 }

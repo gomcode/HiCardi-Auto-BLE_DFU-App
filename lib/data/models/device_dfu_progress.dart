@@ -39,6 +39,4 @@ class DeviceDfuProgress {
   void markAsInProgress() {
     status = DfuConstants.inProgressStatus;
   }
-
-  bool get isInProgress => status == DfuConstants.inProgressStatus;
 }

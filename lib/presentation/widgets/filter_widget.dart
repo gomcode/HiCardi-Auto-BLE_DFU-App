@@ -6,104 +6,67 @@ class FilterWidget extends StatelessWidget {
   final String modelFilter;
   final String serialRangeStart;
   final String serialRangeEnd;
-  final bool isParallelMode;
   final Function(String) onModelFilterChanged;
   final Function(String, String) onSerialRangeChanged;
-  final Function(bool) onParallelModeChanged;
 
   const FilterWidget({
     super.key,
     required this.modelFilter,
     required this.serialRangeStart,
     required this.serialRangeEnd,
-    required this.isParallelMode,
     required this.onModelFilterChanged,
     required this.onSerialRangeChanged,
-    required this.onParallelModeChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        Row(
-          children: [
-            const Text(
-              '모델: ',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-            Expanded(
-              flex: 2,
-              child: DropdownButton<String>(
-                value: modelFilter,
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    onModelFilterChanged(newValue);
-                  }
-                },
-                items: AppConstants.modelFilters
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value, style: const TextStyle(fontSize: 12)),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              '시리얼: ',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-            Expanded(
-              flex: 2,
-              child: _SerialRangeField(
-                label: '시작',
-                value: serialRangeStart,
-                onChanged: (value) => onSerialRangeChanged(value, serialRangeEnd),
-              ),
-            ),
-            const SizedBox(width: 4),
-            const Text('~', style: TextStyle(fontSize: 12)),
-            const SizedBox(width: 4),
-            Expanded(
-              flex: 2,
-              child: _SerialRangeField(
-                label: '끝',
-                value: serialRangeEnd,
-                onChanged: (value) => onSerialRangeChanged(serialRangeStart, value),
-              ),
-            ),
-          ],
+        const Text(
+          '모델: ',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Text(
-              'DFU 모드: ',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-            Switch(
-              value: isParallelMode,
-              onChanged: onParallelModeChanged,
-              activeColor: Colors.orange,
-            ),
-            Text(
-              isParallelMode ? '병렬 처리 (8대 동시)' : '순차 처리 (1대씩)',
-              style: const TextStyle(fontSize: 12),
-            ),
-            const SizedBox(width: 8),
-            Tooltip(
-              message: isParallelMode
-                  ? '여러 기기를 동시에 DFU 진행합니다 (최대 8대)'
-                  : '기기를 하나씩 순차적으로 DFU 진행합니다',
-              child: Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
+        Expanded(
+          flex: 2,
+          child: DropdownButton<String>(
+            value: modelFilter,
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                onModelFilterChanged(newValue);
+              }
+            },
+            items: AppConstants.modelFilters
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value, style: const TextStyle(fontSize: 12)),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          '시리얼: ',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        Expanded(
+          flex: 2,
+          child: _SerialRangeField(
+            label: '시작',
+            value: serialRangeStart,
+            onChanged: (value) => onSerialRangeChanged(value, serialRangeEnd),
+          ),
+        ),
+        const SizedBox(width: 4),
+        const Text('~', style: TextStyle(fontSize: 12)),
+        const SizedBox(width: 4),
+        Expanded(
+          flex: 2,
+          child: _SerialRangeField(
+            label: '끝',
+            value: serialRangeEnd,
+            onChanged: (value) => onSerialRangeChanged(serialRangeStart, value),
+          ),
         ),
       ],
     );

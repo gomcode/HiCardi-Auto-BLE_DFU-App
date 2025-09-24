@@ -20,15 +20,15 @@ class DeviceListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (selectedDevices.isNotEmpty) _buildSelectedDevicesInfo(),
-        const SizedBox(height: 8),
-        if (devices.isNotEmpty) _buildControlButtons(),
-        const SizedBox(height: 8),
-        _buildDeviceList(),
-      ],
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (devices.isNotEmpty) _buildControlButtons(),
+          const SizedBox(height: 8),
+          _buildDeviceList(),
+        ],
+      ),
     );
   }
 
@@ -84,8 +84,7 @@ class DeviceListWidget extends StatelessWidget {
   }
 
   Widget _buildDeviceList() {
-    return SizedBox(
-      height: AppConstants.deviceListHeight.toDouble(),
+    return Expanded(
       child: ListView.builder(
         itemCount: devices.length,
         itemBuilder: (context, index) {
