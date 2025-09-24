@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import '../presentation/providers/dfu_provider.dart';
+import '../presentation/providers/ble_provider.dart';
 import '../core/utils/date_formatter.dart';
+import 'dfu_progress_screen.dart';
 
 class DfuHistoryScreen extends StatelessWidget {
   const DfuHistoryScreen({super.key});
@@ -125,6 +129,34 @@ class DfuHistoryScreen extends StatelessWidget {
                                     color: Colors.grey,
                                   ),
                                 ),
+                                if (historyItem.hardwareVersionBefore != null || historyItem.hardwareVersionAfter != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    historyItem.hardwareVersionBefore != historyItem.hardwareVersionAfter
+                                      ? 'H/W: ${historyItem.hardwareVersionBefore ?? 'N/A'} → ${historyItem.hardwareVersionAfter ?? 'N/A'}'
+                                      : 'H/W: ${historyItem.hardwareVersionBefore ?? historyItem.hardwareVersionAfter}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: historyItem.hardwareVersionBefore != historyItem.hardwareVersionAfter
+                                        ? Colors.orange[700]
+                                        : Colors.grey[700],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                                if (historyItem.firmwareVersionBefore != null || historyItem.firmwareVersionAfter != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'F/W: ${historyItem.firmwareVersionBefore ?? 'N/A'} → ${historyItem.firmwareVersionAfter ?? 'N/A'}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: historyItem.firmwareVersionBefore != historyItem.firmwareVersionAfter
+                                        ? Colors.blue[700]
+                                        : Colors.grey,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -155,13 +187,53 @@ class DfuHistoryScreen extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 ElevatedButton.icon(
                                   onPressed: () async {
+                                    final bleProvider = Provider.of<BleProvider>(context, listen: false);
+                                    final dfuProvider = Provider.of<DfuProvider>(context, listen: false);
+
                                     try {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('재시도는 메인 화면에서 해당 기기를 다시 선택하여 진행해주세요.'),
-                                          backgroundColor: Colors.blue,
-                                        ),
+                                      final result = await FilePicker.platform.pickFiles(
+                                        type: FileType.custom,
+                                        allowedExtensions: ['zip'],
                                       );
+
+                                      if (result == null || result.files.single.path == null) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('파일 선택이 취소되었습니다')),
+                                          );
+                                        }
+                                        return;
+                                      }
+
+                                      final firmwareFile = File(result.files.single.path!);
+
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('기기 검색 중...'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
+
+                                      await bleProvider.startScan();
+                                      await Future.delayed(Duration(seconds: 3));
+
+                                      final device = bleProvider.devices.firstWhere(
+                                        (d) => d.remoteId.str == historyItem.deviceId,
+                                        orElse: () => throw Exception('기기를 찾을 수 없습니다'),
+                                      );
+
+                                      dfuProvider.selectFirmwareFile(firmwareFile);
+
+                                      if (context.mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const DfuProgressScreen()),
+                                        );
+                                      }
+
+                                      await dfuProvider.startDfu([device]);
                                     } catch (e) {
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(

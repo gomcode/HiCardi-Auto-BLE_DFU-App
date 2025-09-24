@@ -129,6 +129,15 @@ class DfuProvider extends ChangeNotifier {
   }
 
   void _addToHistory(BluetoothDevice device, String zipFileName, bool isSuccess, String? errorMessage) {
+    final deviceProgress = _deviceProgressMap[device.remoteId.str];
+
+    debugPrint('=== 히스토리 추가 ===');
+    debugPrint('기기: ${device.platformName}');
+    debugPrint('H/W Before: ${deviceProgress?.hardwareVersionBefore}');
+    debugPrint('H/W After: ${deviceProgress?.hardwareVersionAfter}');
+    debugPrint('F/W Before: ${deviceProgress?.firmwareVersionBefore}');
+    debugPrint('F/W After: ${deviceProgress?.firmwareVersionAfter}');
+
     final historyItem = DfuHistoryItem(
       deviceId: device.remoteId.str,
       deviceName: device.platformName,
@@ -136,6 +145,10 @@ class DfuProvider extends ChangeNotifier {
       isSuccess: isSuccess,
       timestamp: DateTime.now(),
       errorMessage: errorMessage,
+      firmwareVersionBefore: deviceProgress?.firmwareVersionBefore,
+      firmwareVersionAfter: deviceProgress?.firmwareVersionAfter,
+      hardwareVersionBefore: deviceProgress?.hardwareVersionBefore,
+      hardwareVersionAfter: deviceProgress?.hardwareVersionAfter,
     );
 
     HistoryProvider.addHistoryItem(historyItem);

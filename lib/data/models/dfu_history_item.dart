@@ -5,6 +5,10 @@ class DfuHistoryItem {
   final bool isSuccess;
   final DateTime timestamp;
   final String? errorMessage;
+  final String? firmwareVersionBefore;
+  final String? firmwareVersionAfter;
+  final String? hardwareVersionBefore;
+  final String? hardwareVersionAfter;
 
   const DfuHistoryItem({
     required this.deviceId,
@@ -13,6 +17,10 @@ class DfuHistoryItem {
     required this.isSuccess,
     required this.timestamp,
     this.errorMessage,
+    this.firmwareVersionBefore,
+    this.firmwareVersionAfter,
+    this.hardwareVersionBefore,
+    this.hardwareVersionAfter,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +30,10 @@ class DfuHistoryItem {
     'isSuccess': isSuccess,
     'timestamp': timestamp.toIso8601String(),
     'errorMessage': errorMessage,
+    'firmwareVersionBefore': firmwareVersionBefore,
+    'firmwareVersionAfter': firmwareVersionAfter,
+    'hardwareVersionBefore': hardwareVersionBefore,
+    'hardwareVersionAfter': hardwareVersionAfter,
   };
 
   factory DfuHistoryItem.fromJson(Map<String, dynamic> json) => DfuHistoryItem(
@@ -31,6 +43,10 @@ class DfuHistoryItem {
     isSuccess: json['isSuccess'] as bool,
     timestamp: DateTime.parse(json['timestamp'] as String),
     errorMessage: json['errorMessage'] as String?,
+    firmwareVersionBefore: json['firmwareVersionBefore'] as String?,
+    firmwareVersionAfter: json['firmwareVersionAfter'] as String?,
+    hardwareVersionBefore: json['hardwareVersionBefore'] as String? ?? json['hardwareVersion'] as String?,
+    hardwareVersionAfter: json['hardwareVersionAfter'] as String?,
   );
 
   @override

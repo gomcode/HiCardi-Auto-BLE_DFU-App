@@ -234,8 +234,12 @@ class DfuScreen extends StatelessWidget {
       context,
       MaterialPageRoute(builder: (context) => const DfuProgressScreen()),
     );
-    dfuProvider.startDfu(bleProvider.selectedDevices);
 
-    bleProvider.selectedDevices.forEach(bleProvider.removeFromSelection);
+    final devicesToRemove = bleProvider.selectedDevices.toList();
+    dfuProvider.startDfu(devicesToRemove);
+
+    for (var device in devicesToRemove) {
+      bleProvider.removeFromSelection(device);
+    }
   }
 }

@@ -77,25 +77,7 @@ class ProgressIndicatorWidget extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  deviceProgress.deviceName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'MAC 주소: ${deviceProgress.deviceId}',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _DeviceProgressCard(deviceProgress: deviceProgress),
       ],
     );
   }

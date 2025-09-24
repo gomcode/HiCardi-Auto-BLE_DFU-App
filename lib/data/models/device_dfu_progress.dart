@@ -8,6 +8,10 @@ class DeviceDfuProgress {
   bool isCompleted;
   bool isError;
   String? errorMessage;
+  String? firmwareVersionBefore;
+  String? firmwareVersionAfter;
+  String? hardwareVersionBefore;
+  String? hardwareVersionAfter;
 
   DeviceDfuProgress({
     required this.deviceId,
