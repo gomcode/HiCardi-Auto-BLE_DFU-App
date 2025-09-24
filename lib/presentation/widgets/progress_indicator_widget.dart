@@ -121,6 +121,37 @@ class _DeviceProgressCard extends StatelessWidget {
               '${(deviceProgress.progress * 100).toInt()}%',
               style: const TextStyle(fontSize: 12),
             ),
+            if (deviceProgress.hardwareVersionBefore != null || deviceProgress.firmwareVersionBefore != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  if (deviceProgress.hardwareVersionBefore != null)
+                    Expanded(
+                      child: Text(
+                        'H/W: ${deviceProgress.hardwareVersionBefore}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  if (deviceProgress.firmwareVersionBefore != null)
+                    Expanded(
+                      child: Text(
+                        'F/W: ${deviceProgress.firmwareVersionBefore}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+            ],
             if (deviceProgress.isError && deviceProgress.errorMessage != null) ...[
               const SizedBox(height: 4),
               Text(

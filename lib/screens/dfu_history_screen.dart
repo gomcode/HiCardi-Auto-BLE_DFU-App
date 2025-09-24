@@ -101,31 +101,63 @@ class DfuHistoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  historyItem.deviceName,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            historyItem.deviceName,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            historyItem.deviceId,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: historyItem.isSuccess
+                                            ? Colors.green
+                                            : Colors.red,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        historyItem.isSuccess ? '성공' : '실패',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   historyItem.zipFileName,
                                   style: const TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'ID: ${historyItem.deviceId}',
-                                  style: const TextStyle(
-                                    fontSize: 10,
                                     color: Colors.grey,
                                   ),
                                 ),
@@ -160,33 +192,15 @@ class DfuHistoryScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: historyItem.isSuccess
-                                      ? Colors.green
-                                      : Colors.red,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  historyItem.isSuccess ? '성공' : '실패',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              if (!historyItem.isSuccess) ...[
-                                const SizedBox(height: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () async {
+                        ],
+                      ),
+                      if (!historyItem.isSuccess) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () async {
                                     final bleProvider = Provider.of<BleProvider>(context, listen: false);
                                     final dfuProvider = Provider.of<DfuProvider>(context, listen: false);
 
@@ -258,12 +272,10 @@ class DfuHistoryScreen extends StatelessWidget {
                                       vertical: 4,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
