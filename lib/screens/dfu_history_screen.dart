@@ -14,8 +14,10 @@ class DfuHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 48,
         title: const Text('DFU 업데이트 히스토리'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
         actions: [
           Consumer<HistoryProvider>(
             builder: (context, historyProvider, child) {

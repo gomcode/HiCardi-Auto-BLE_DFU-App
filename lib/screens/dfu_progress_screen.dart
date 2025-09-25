@@ -10,7 +10,18 @@ class DfuProgressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DFU 진행률'),
+        toolbarHeight: 48,
+        title: Consumer<DfuProvider>(
+          builder: (context, dfuProvider, child) {
+            return Row(
+              children: [
+                const Text('DFU 진행률'),
+                const Spacer(),
+                Text('${dfuProvider.currentDfuIndex + 1}/${dfuProvider.totalDfuDevices}'),
+              ],
+            );
+          },
+        ),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -18,17 +29,36 @@ class DfuProgressScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
           tooltip: '이전',
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(30),
+          child: Consumer<DfuProvider>(
+            builder: (context, dfuProvider, child) {
+              return Container(
+                color: Colors.white,
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: SizedBox(
+                  height: 8,
+                  width: double.infinity,
+                  child: LinearProgressIndicator(
+                    value: dfuProvider.dfuProgress,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
       body: SafeArea(
         bottom: true,
         child: Consumer<DfuProvider>(
           builder: (context, dfuProvider, child) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
+            return Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: ProgressIndicatorWidget(
                       overallProgress: dfuProvider.dfuProgress,
                       status: dfuProvider.dfuStatus,
@@ -36,23 +66,28 @@ class DfuProgressScreen extends StatelessWidget {
                       isMultipleDfu: dfuProvider.isMultipleDfu,
                     ),
                   ),
-                  if (!dfuProvider.isDfuInProgress) ...[
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        '완료',
-                        style: TextStyle(fontSize: 16),
+                ),
+                if (!dfuProvider.isDfuInProgress) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          '완료',
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             );
           },
         ),

@@ -17,55 +17,26 @@ class ProgressIndicatorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildOverallProgress(),
-        const SizedBox(height: 16),
-        if (isMultipleDfu) _buildMultipleDeviceProgress()
-        else _buildSingleDeviceProgress(),
-      ],
+    if (isMultipleDfu) {
+      return _buildMultipleDeviceProgressWithFixedHeader();
+    } else {
+      return _buildSingleDeviceProgressWithFixedHeader();
+    }
+  }
+
+
+
+  Widget _buildMultipleDeviceProgressWithFixedHeader() {
+    return ListView.builder(
+      itemCount: deviceProgressMap.length,
+      itemBuilder: (context, index) {
+        final deviceProgress = deviceProgressMap.values.elementAt(index);
+        return _DeviceProgressCard(deviceProgress: deviceProgress);
+      },
     );
   }
 
-  Widget _buildOverallProgress() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '전체 진행률',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(value: overallProgress),
-            const SizedBox(height: 8),
-            Text(status, style: const TextStyle(fontSize: 14)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMultipleDeviceProgress() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '기기별 진행률',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        ...deviceProgressMap.values.map((deviceProgress) =>
-          _DeviceProgressCard(deviceProgress: deviceProgress)
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSingleDeviceProgress() {
+  Widget _buildSingleDeviceProgressWithFixedHeader() {
     if (deviceProgressMap.isEmpty) return const SizedBox.shrink();
 
     final deviceProgress = deviceProgressMap.values.first;
@@ -81,6 +52,7 @@ class ProgressIndicatorWidget extends StatelessWidget {
       ],
     );
   }
+
 }
 
 class _DeviceProgressCard extends StatelessWidget {
@@ -91,9 +63,9 @@ class _DeviceProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 6),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -110,16 +82,11 @@ class _DeviceProgressCard extends StatelessWidget {
                 _buildStatusChip(),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             LinearProgressIndicator(
               value: deviceProgress.progress,
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(_getProgressColor()),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${(deviceProgress.progress * 100).toInt()}%',
-              style: const TextStyle(fontSize: 12),
             ),
             if (deviceProgress.hardwareVersionBefore != null || deviceProgress.firmwareVersionBefore != null) ...[
               const SizedBox(height: 8),
@@ -184,8 +151,8 @@ class _DeviceProgressCard extends StatelessWidget {
   }
 
   Color _getProgressColor() {
-    if (deviceProgress.isCompleted) return Colors.green;
+    if (deviceProgress.isCompleted) return Colors.blue;
     if (deviceProgress.isError) return Colors.red;
-    return Colors.blue;
+    return Colors.green;
   }
 }

@@ -23,8 +23,10 @@ class DfuScreen extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text(AppConstants.appTitle),
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      toolbarHeight: 48,
+      title: const Text('HiCardi QuickDFU'),
+      backgroundColor: Colors.blue,
+      foregroundColor: Colors.white,
       actions: [_buildAppBarActions(context)],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(60),
@@ -215,6 +217,14 @@ class DfuScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 4),
+                const Text(
+                  'V.0.0.2',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
           ),

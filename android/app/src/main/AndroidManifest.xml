@@ -15,7 +15,7 @@
         android:required="true" />
 
     <application
-        android:label="nordic_auto_dfu_app"
+        android:label="QuickDFU"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
